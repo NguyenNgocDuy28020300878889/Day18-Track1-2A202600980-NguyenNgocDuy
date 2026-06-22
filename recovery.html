@@ -462,6 +462,9 @@
         }
 
         // Scenario 1 Logic
+        let lastAction = null;
+        let toastTimeout = null;
+
         function applyWeatherRecovery() {
             // Animating removal of thin clothes
             document.getElementById('item-sunscreen').classList.add('removed');
@@ -469,6 +472,10 @@
 
             // Add warm clothing list items
             const itemsList = document.getElementById('weather-items');
+            
+            // Clear any previously added items
+            const existingAdded = document.querySelectorAll('#weather-items .added');
+            existingAdded.forEach(item => item.remove());
             
             const itemJacket = document.createElement('div');
             itemJacket.className = 'item-row added';
@@ -489,12 +496,14 @@
             // Hide alert
             document.getElementById('weather-alert').style.display = 'none';
 
-            showToast("Đã khôi phục: Đã chuyển đổi sang danh sách đồ ấm & chống mưa!");
+            lastAction = { type: 'weather' };
+            showToast("Đã khôi phục: Đã chuyển đổi sang danh sách đồ ấm!", true);
         }
 
         function ignoreWeatherAlert() {
             document.getElementById('weather-alert').style.display = 'none';
-            showToast("Đã giữ nguyên danh sách chuẩn bị cũ.");
+            lastAction = { type: 'weather-ignore' };
+            showToast("Đã ẩn cảnh báo thời tiết.", true);
         }
 
         // Scenario 2 Logic
@@ -519,7 +528,10 @@
             label.innerText = '4.5 kg (An toàn ✓)';
             label.style.color = 'var(--success)';
 
-            showToast("Đã khôi phục: Đã loại bỏ đồ cấm bay & chuyển Lều sang dịch vụ thuê ngoài!");
+            document.getElementById('weight-alert').style.display = 'none';
+
+            lastAction = { type: 'weight' };
+            showToast("Đã khôi phục: Đã loại bỏ đồ cấm & chuyển Lều sang thuê ngoài!", true);
         }
 
         function buyCheckinWeight() {
@@ -532,16 +544,75 @@
             label.innerText = '12.2 kg / Hạn mức 20kg (An toàn ✓)';
             label.style.color = 'var(--success)';
 
-            showToast("Đã mở rộng hạn mức ký gửi lên 20kg thành công!");
+            document.getElementById('weight-alert').style.display = 'none';
+
+            lastAction = { type: 'weight-buy' };
+            showToast("Đã mở rộng hạn mức ký gửi lên 20kg thành công!", true);
         }
 
-        function showToast(msg) {
+        function showToast(msg, showUndo = false) {
             const toast = document.getElementById('recovery-toast');
-            toast.innerText = msg;
+            if (showUndo) {
+                toast.innerHTML = msg + ` <a href="#" onclick="undoLastAction(event)" style="color: #000; text-decoration: underline; margin-left: 8px; font-weight: 800;">[Hoàn tác]</a>`;
+            } else {
+                toast.innerText = msg;
+            }
             toast.classList.add('show');
-            setTimeout(() => {
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3500);
+            }, 5000);
+        }
+
+        function undoLastAction(e) {
+            if (e) e.preventDefault();
+            if (!lastAction) return;
+
+            if (lastAction.type === 'weather') {
+                document.getElementById('item-sunscreen').classList.remove('removed');
+                document.getElementById('item-shorts').classList.remove('removed');
+                const addedItems = document.querySelectorAll('#weather-items .added');
+                addedItems.forEach(item => item.remove());
+                document.getElementById('weather-alert').style.display = 'flex';
+                showToast("Đã hoàn tác cập nhật thời tiết!");
+            } else if (lastAction.type === 'weather-ignore') {
+                document.getElementById('weather-alert').style.display = 'flex';
+                showToast("Đã hiển thị lại cảnh báo thời tiết!");
+            } else if (lastAction.type === 'weight') {
+                document.getElementById('flight-item-knife').style.display = 'flex';
+                document.getElementById('flight-item-pole').style.display = 'flex';
+                
+                const tent = document.getElementById('flight-item-tent');
+                tent.classList.remove('removed');
+                tent.querySelector('.item-name').innerText = "Lều cắm trại cá nhân (3.5kg)";
+                
+                const sleepingbag = document.getElementById('flight-item-sleepingbag');
+                sleepingbag.classList.remove('removed');
+                sleepingbag.querySelector('.item-name').innerText = "Túi ngủ ấm (1.5kg)";
+
+                const fill = document.getElementById('weight-bar');
+                fill.className = 'weight-bar-fill';
+                fill.style.width = '100%';
+
+                const label = document.getElementById('weight-label');
+                label.innerText = '12.2 kg (Quá tải ⚠️)';
+                label.style.color = 'var(--danger)';
+
+                document.getElementById('weight-alert').style.display = 'flex';
+                showToast("Đã hoàn tác tối ưu hóa cân nặng!");
+            } else if (lastAction.type === 'weight-buy') {
+                const fill = document.getElementById('weight-bar');
+                fill.className = 'weight-bar-fill';
+                fill.style.width = '100%';
+
+                const label = document.getElementById('weight-label');
+                label.innerText = '12.2 kg (Quá tải ⚠️)';
+                label.style.color = 'var(--danger)';
+
+                document.getElementById('weight-alert').style.display = 'flex';
+                showToast("Đã hoàn tác thay đổi hạn mức ký gửi!");
+            }
+            lastAction = null;
         }
 
         // Add tick behavior to checklist boxes

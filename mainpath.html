@@ -340,6 +340,32 @@
             box-shadow: none;
             margin-top: 8px;
         }
+
+        /* Toast feedback notification */
+        .toast {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 230, 118, 0.95);
+            color: #000;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+            z-index: 2000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -455,6 +481,31 @@
                 </div>
             </div>
 
+            <!-- Modal Ghi nhớ thói quen (Opt-in) -->
+            <div id="pref-modal" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+                <div class="glass-card" style="border: 1px solid var(--primary); background: #120f1d; padding: 20px; text-align: center; border-radius: 20px;">
+                    <div style="font-size: 24px; margin-bottom: 12px;">🧠</div>
+                    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--primary);">Ghi nhớ sở thích?</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 16px;">
+                        Bạn vừa bỏ chọn "Giày leo núi". AI có nên ghi nhớ và bỏ đề xuất giày leo núi cho toàn bộ chuyến đi Trekking tiếp theo của bạn không?
+                    </p>
+                    
+                    <!-- Opt-in checkbox: Unchecked by default (HCAI Privacy Principle) -->
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; width: 100%;">
+                        <input type="checkbox" id="pref-optin" style="width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer;">
+                        <label for="pref-optin" style="font-size: 11px; font-weight: 600; color: #fff; cursor: pointer;">Đồng ý ghi nhớ thói quen này</label>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button class="btn" style="padding: 10px; font-size: 12px; flex: 1;" onclick="savePreference(true)">Xác nhận</button>
+                        <button class="btn btn-secondary" style="padding: 10px; font-size: 12px; margin-top: 0; flex: 1;" onclick="savePreference(false)">Bỏ qua</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toast feedback notification -->
+            <div class="toast" id="mainpath-toast">Đã cập nhật thành công!</div>
+
         </div>
     </div>
 
@@ -551,6 +602,16 @@
                 document.querySelectorAll('#dynamic-items .item-checkbox').forEach(box => {
                     box.onclick = function() {
                         this.classList.toggle('checked');
+                        if (this.classList.contains('checked')) {
+                            this.innerHTML = '✓';
+                        } else {
+                            this.innerHTML = '';
+                            // If the unchecked item is the trekking shoes
+                            if (this.nextElementSibling && this.nextElementSibling.innerText.includes('Giày leo núi')) {
+                                lastAction = { type: 'uncheck-shoes' };
+                                openPrefModal();
+                            }
+                        }
                     };
                 });
             }, 100);
@@ -578,8 +639,68 @@
         document.querySelectorAll('.checklist-scroll .item-checkbox').forEach(box => {
             box.onclick = function() {
                 this.classList.toggle('checked');
+                if (this.classList.contains('checked')) {
+                    this.innerHTML = '✓';
+                } else {
+                    this.innerHTML = '';
+                }
             };
         });
+
+        // HCAI Preferences and Toast functions
+        let lastAction = null;
+        let toastTimeout = null;
+
+        function openPrefModal() {
+            document.getElementById('pref-modal').style.display = 'flex';
+        }
+
+        function savePreference(confirm) {
+            const isOptedIn = document.getElementById('pref-optin').checked;
+            document.getElementById('pref-modal').style.display = 'none';
+            
+            if (confirm && isOptedIn) {
+                showToast("AI đã ghi nhớ thói quen này cho các chuyến đi trekking sau!", false);
+            } else if (confirm && !isOptedIn) {
+                // If confirmed but opt-in checkbox is false, we respect privacy and do NOT save long term
+                showToast("Đã bỏ chọn. Thói quen chưa được ghi nhớ (để bảo mật riêng tư).", true);
+            } else {
+                showToast("Đã hủy bỏ thiết lập.", false);
+            }
+            // Reset opt-in state
+            document.getElementById('pref-optin').checked = false;
+        }
+
+        function showToast(msg, showUndo = false) {
+            const toast = document.getElementById('mainpath-toast');
+            if (showUndo) {
+                toast.innerHTML = msg + ` <a href="#" onclick="undoLastAction(event)" style="color: #000; text-decoration: underline; margin-left: 8px; font-weight: 800;">[Hoàn tác]</a>`;
+            } else {
+                toast.innerText = msg;
+            }
+            toast.classList.add('show');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        function undoLastAction(e) {
+            if (e) e.preventDefault();
+            if (!lastAction) return;
+
+            if (lastAction.type === 'uncheck-shoes') {
+                const boxes = document.querySelectorAll('#dynamic-items .item-checkbox');
+                boxes.forEach(box => {
+                    if (box.nextElementSibling && box.nextElementSibling.innerText.includes('Giày leo núi')) {
+                        box.classList.add('checked');
+                        box.innerHTML = '✓';
+                    }
+                });
+                showToast("Đã hoàn tác (khôi phục tích chọn Giày leo núi)!");
+            }
+            lastAction = null;
+        }
     </script>
 </body>
 </html>

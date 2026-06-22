@@ -1,84 +1,85 @@
-# Kế Hoạch Thực Thi Thiết Kế Prototype: AI Smart Packing & Prep (120 Phút)
+# 🎒 Prototype Thiết Kế Trải Nghiệm AI: Smart Packing & Prep
 
-**Track:** AI Travel Planner
-**Lát cắt:** Gợi ý hành trang theo thời tiết và hoạt động (Smart Packing & Prep).
-[cite_start]**Tổng quan:** Thiết kế lát cắt xuyên suốt vòng đời: Onboarding -> Trong tương tác -> Sau tương tác -> Phản hồi & Khôi phục [cite: 99-106, 453].
-
----
-
-## [cite_start]Giai đoạn 0: Bản đồ phạm vi (10 Phút) 
-*Thao tác trên công cụ:* Mở một Frame riêng để liệt kê nhanh 5 kịch bản đã chốt để làm "kim chỉ nam".
-* **Kịch bản 1 (Onboarding):** Thiết lập kỳ vọng và xin quyền truy cập thời tiết/lịch trình.
-* **Kịch bản 2 (Tương tác - Ask):** Hỏi rõ mục đích chuyến đi khi dữ liệu đầu vào mơ hồ (ví dụ: chỉ nhập "Đà Lạt").
-* **Kịch bản 3 (Tương tác - Explainability):** AI tự động tạo checklist (Act) và đưa ra lớp bằng chứng giải thích lý do chọn món đồ.
-* **Kịch bản 4 (Sai sót - Recovery):** AI gợi ý sai "Đồ bơi" do hiểu nhầm bối cảnh. Người dùng xóa, AI cập nhật lại.
-* **Kịch bản 5 (Agency - Don't Act):** Phát hiện thiếu sạc dự phòng, AI đề xuất link mua (Ask/Don't Act) thay vì tự mua.
+*Dự án thực hành thuộc Ngày 18 — Human-Centered AI Design (HCAI)*  
+* **Track:** AI Travel Planner  
+* **Lát cắt:** Gợi ý hành trang theo thời tiết và hoạt động chuyến đi (Smart Packing & Prep)  
+* **Mã học viên:** 2A202600980  
+* **Học viên thực hiện:** Nguyễn Ngọc Duy  
 
 ---
 
-## [cite_start]Giai đoạn 1: Nối vòng đời trải nghiệm - Flow Map (10 Phút) 
-[cite_start]*Thao tác trên công cụ:* Dùng công cụ vẽ Flowchart vẽ các khối (Node) nối tiếp nhau đại diện cho hành trình[cite: 440].
-* `Start` -> `Onboarding Screen` -> `Nhập điểm đến/Thời gian` -> `AI Phân tích (Loading)`.
-* Từ `AI Phân tích` chia nhánh:
-    * **Nhánh 1 (Thiếu dữ kiện):** -> `AI Hỏi thêm mục đích` -> `Người dùng trả lời` -> `Kết quả Checklist`.
-    * **Nhánh 2 (Đủ dữ kiện):** -> `Kết quả Checklist` (kèm lớp Explainability).
-* Từ `Kết quả Checklist` chia nhánh khôi phục:
-    * **Nhánh Lỗi 1:** -> `Người dùng xóa đồ sai` -> `Hệ thống xác nhận đã hiểu & Xóa`.
-    * **Nhánh Mua sắm:** -> `AI gợi ý mua đồ` -> `Người dùng từ chối (chọn "Đã có")` -> `Hệ thống cập nhật trạng thái`.
-* Hội tụ lại -> `Lưu hành trang (Hoàn thành)`.
+## 📖 Tổng Quan Dự Án
+Dự án tập trung vào việc thiết kế một lát cắt trải nghiệm AI giúp người dùng chuẩn bị hành lý tối ưu khi đi du lịch. Thiết kế tuân thủ nghiêm ngặt các nguyên lý **Human-Centered AI (HCAI)** nhằm đảm bảo người dùng:
+1. **Hiểu đúng và tin đúng mức (Mental Model & Calibration):** AI chỉ đóng vai trò gợi ý (Co-pilot), quyền quyết định tối cao thuộc về con người.
+2. **Giữ quyền kiểm soát (User Control & Autonomy):** Cung cấp các công cụ chỉnh sửa, cấp quyền minh bạch, và tính năng **Hoàn tác (Undo)**.
+3. **Khôi phục dễ dàng khi AI sai sót (Failure & Recovery):** Khi thời tiết thay đổi đột ngột hoặc quá cân hành lý, hệ thống đưa ra giải pháp xử lý một chạm.
 
 ---
 
-## [cite_start]Giai đoạn 2: Thiết kế Onboarding (15 Phút) 
-[cite_start]*Mục tiêu:* Giúp người dùng hiểu AI hỗ trợ gì, không thể làm gì, cần quyền gì [cite: 111-114].
-*Thao tác vẽ Màn hình (UI):*
-* **Màn hình 1 (Welcome):** * *Copy:* "Trợ lý Hành trang thông minh. Tôi phân tích thời tiết và lịch trình để gợi ý đồ dùng."
-    * *Ranh giới:* "Tôi có thể gợi ý đồ, nhưng bạn là người quyết định cuối cùng."
-* **Màn hình 2 (Permissions):**
-    * *UI:* 2 toggle switch cho "Truy cập Dự báo thời tiết" và "Đọc lịch trình chuyến đi".
-    * *Nút bấm:* "Bắt đầu chuyến đi".
-* **Màn hình 3 (Input):**
-    * *UI:* Form nhập "Điểm đến" và "Ngày đi". Nút "Tạo Checklist".
+## 🚀 Từng Bước Đã Thực Hiện (Step-by-Step Achievements)
+
+### Bước 1: Xác Định Phạm Vi & Thiết Lập Kịch Bản Trải Nghiệm
+*   Chọn lát cắt tập trung: **Gợi ý hành trang** dựa trên thời tiết thực tế tại điểm đến và hoạt động trong lịch trình (tránh làm phạm vi quá rộng như "toàn bộ ứng dụng du lịch").
+*   Xây dựng chi tiết 6 kịch bản trải nghiệm trong [kichban.md](file:///c:/Users/Administrator/Day18-Track1-2A202600980-NguyenNgocDuy/kichban.md) từ Onboarding (T0), Tương tác chuẩn (T1, T2, T3) đến xử lý sai sót và khôi phục (T6, T7).
+
+### Bước 2: Thiết Kế Sơ Đồ Vòng Đời Trải Nghiệm (Flow Map)
+*   Sử dụng **Mermaid.js** để vẽ và hệ thống hóa toàn bộ các điểm chạm, mức độ tự chủ của AI (`Act`, `Ask`, `Don't Act`) và các nhánh xử lý khôi phục lỗi. Chi tiết sơ đồ xem tại [flowmap.md](file:///c:/Users/Administrator/Day18-Track1-2A202600980-NguyenNgocDuy/flowmap.md).
+
+### Bước 3: Hiện Thực Hóa Giao Diện Onboarding Thiết Lập Kỳ Vọng
+*   Xây dựng [onboarding.html](file:///c:/Users/Administrator/Day18-Track1-2A202600980-NguyenNgocDuy/onboarding.html) gồm 3 màn hình tương tác:
+    *   **Màn hình Welcome:** Định hình rõ giới hạn hệ thống ("Tôi chỉ gợi ý và không tự thanh toán", "Tôi chưa biết tủ đồ thực tế của bạn").
+    *   **Màn hình Cấp quyền (Permissions):** Toggle switch cho phép người dùng chủ động bật/tắt quyền đọc thời tiết & lịch trình.
+    *   **Màn hình Nhập liệu (Inputs):** Form trực quan để người dùng khởi tạo chuyến đi.
+
+### Bước 4: Hiện Thực Luồng Chính & Phân Định Mức Tự Chủ (Agency)
+*   Xây dựng [mainpath.html](file:///c:/Users/Administrator/Day18-Track1-2A202600980-NguyenNgocDuy/mainpath.html) thể hiện rõ:
+    *   **Mức Ask (Hỏi trước):** AI đặt câu hỏi làm rõ phương tiện di chuyển (Jeep hay Trekking) tại Langbiang khi bối cảnh còn mơ hồ.
+    *   **Mức Act (Tự động):** AI tự động điền và sắp xếp checklist nháp do rủi ro thấp.
+    *   **Mức Don't Act (Tuyệt đối không tự ý):** Khi thấy thiếu sạc dự phòng, AI chỉ hiển thị đề xuất và link mua sắm bên ngoài, hoàn toàn không tự động thanh toán.
+    *   **Explainability (Giải trình):** Nút `ⓘ` cạnh mỗi món đồ quan trọng mở ra lý do chi tiết ("Đề xuất áo ấm vì dự báo có mưa 80% và lạnh 15°C").
+
+### Bước 5: Hiện Thực Luồng Khôi Phục Sai Sót & Tích Hợp Hoàn Tác (Undo)
+*   Xây dựng [recovery.html](file:///c:/Users/Administrator/Day18-Track1-2A202600980-NguyenNgocDuy/recovery.html) giải quyết 2 tình huống lỗi/thay đổi:
+    *   **Fansipan đổi thời tiết đột ngột:** Hiển thị banner đỏ cảnh báo. Nút *[Cập nhật đồ ấm]* cho phép 1 chạm đổi sang trang phục giữ nhiệt.
+    *   **Vietjet Air quá tải cân nặng xách tay (>7kg):** Thanh đo tải trọng chuyển sang màu đỏ. Nút *[Tối ưu theo luật bay]* tự động loại đồ cấm bay (dao kéo, gậy kim loại) và gợi ý thuê lều tại điểm đến để đưa hành lý về mức 4.5kg an toàn (thanh xanh).
+    *   **Tích hợp Hoàn tác (Undo):** Trên Toast thông báo của mọi hành động khôi phục đều có liên kết **`[Hoàn tác]`** giúp người dùng đảo ngược quyết định và quay lại trạng thái cũ ngay lập tức nếu lỡ tay.
+
+### Bước 6: Thiết Thiết Kế Opt-In Bảo Vệ Quyền Riêng Tư
+*   Trong trang [mainpath.html](file:///c:/Users/Administrator/Day18-Track1-2A202600980-NguyenNgocDuy/mainpath.html), khi người dùng bỏ tick chọn "Giày leo núi", AI sẽ hiển thị một Modal hỏi có muốn ghi nhớ thói quen này cho các chuyến đi trekking sau không.
+*   Hộp chọn "Đồng ý ghi nhớ" **để trống theo mặc định (Opt-in)**. Nếu người dùng không chọn mà nhấn xác nhận, AI tôn trọng quyền riêng tư và sẽ không ghi nhớ lâu dài sở thích này.
+
+### Bước 7: Trực Quan Hóa Vòng Phản Hồi Hai Chiều 2x2
+*   Xây dựng [feedback.html](file:///c:/Users/Administrator/Day18-Track1-2A202600980-NguyenNgocDuy/feedback.html) dưới dạng một Dashboard tương tác. Giảng viên có thể nhấp vào các thẻ màu đại diện cho 4 ô phản hồi:
+    *   *User Explicit:* Xóa đồ bơi và chọn lý do "Đi công tác".
+    *   *User Implicit:* Thời gian người dùng dừng lại đọc tooltip / bỏ qua link mua sạc.
+    *   *System Explicit:* Toast xác nhận đã hiểu bối cảnh và xóa đồ.
+    *   *System Implicit:* Đẩy các món đồ thiết yếu lên đầu danh sách và in đậm.
 
 ---
 
-## [cite_start]Giai đoạn 3: Luồng chính & Agency (20 Phút) 
-[cite_start]*Mục tiêu:* Thể hiện rõ 3 mức độ tự chủ của AI (Act, Ask, Don't Act) [cite: 194-198].
-*Thao tác vẽ Màn hình (UI):*
-* **Màn hình 4 (AI Processing - Tương tác):** * *UI:* Màn hình chat/popup nổi lên. AI hỏi: "Đà Lạt mùa này có nhiều lựa chọn, bạn dự định đi Trekking hay Nghỉ dưỡng?". [cite_start](Mức độ: **Ask** vì thiếu bối cảnh [cite: 32]).
-* **Màn hình 5 (Checklist Result - Act & Explainability):** * *UI:* Danh sách đồ dùng được chia nhóm (Quần áo, Thiết bị, Y tế). AI tự điền các món cơ bản (Mức độ: **Act** vì rủi ro thấp [cite: 198]).
-    * *UI (Lớp bằng chứng):* Cạnh item "Áo khoác gió", làm một icon (i). [cite_start]Bấm vào hiện Tooltip: "Dự báo Đà Lạt có mưa 80% và lạnh 15 độ vào ngày thứ 2" [cite: 246-248].
+## 🛠️ Cấu Trúc Thư Mục Nộp Bài
+
+```text
+Day18-Track1-2A202600980-NguyenNgocDuy/
+├── README.md               # Tài liệu tổng quan dự án (tệp này)
+├── flowmap.md              # Sơ đồ Mermaid.js vòng đời trải nghiệm
+├── kichban.md              # Kịch bản chi tiết 6 tình huống HCAI
+├── onboarding-ui.md        # Wireframe và giải trình giao diện onboarding
+├── index.html              # Hub thuyết trình chính (Demo Hub)
+├── onboarding.html         # Giao diện Onboarding tương tác
+├── mainpath.html           # Giao diện luồng chính, Agency & Opt-in
+├── recovery.html           # Giao diện Khôi phục lỗi & Hoàn tác (Undo)
+└── feedback.html           # Mockup tương tác Vòng phản hồi 2x2
+```
 
 ---
 
-## [cite_start]Giai đoạn 4: Thiết kế Sai sót & Khôi phục (30 Phút) 
-[cite_start]*Mục tiêu:* Xử lý khi AI sai hoặc không chắc chắn, không chỉ có nút "báo lỗi" mà phải có đường đi tiếp[cite: 137].
-*Thao tác vẽ Màn hình (UI):*
-* **Màn hình 6 (Khôi phục lỗi ngữ cảnh):**
-    * *Sự cố:* AI gợi ý "Đồ bơi".
-    * *UI Thao tác:* Người dùng quẹt trái/bấm icon Thùng rác để xóa. Hệ thống hiện bảng chọn lý do: "Không có nhu cầu / Đi công tác".
-    * [cite_start]*UI Khôi phục:* Toast message hiện lên: "Đã ghi nhớ bối cảnh công tác. Đã xóa đồ bơi." [cite: 142-150].
-* **Màn hình 7 (Khôi phục đề xuất - Agency rủi ro cao):**
-    * *Sự cố:* AI thấy thiếu "Sạc dự phòng".
-    * *UI Thao tác:* Hiện thẻ "Gợi ý mua sắm sạc dự phòng - 200k" kèm nút "Mua ngay" và nút "Tôi đã có". [cite_start](Mức độ: **Don't Act tự mua / Ask xin phép** vì liên quan tiền bạc [cite: 198]).
-    * *UI Khôi phục:* Người dùng bấm "Tôi đã có". Thẻ gợi ý biến mất, checklist tick xanh món đồ đó.
+## 💻 Hướng Dẫn Chạy Thử Prototype
+Bạn không cần kết nối API hay cơ sở dữ liệu thật. Toàn bộ trải nghiệm đã được mô phỏng mượt mà trên nền tảng HTML/CSS/JavaScript thuần:
 
----
-
-## [cite_start]Giai đoạn 5: Vòng Feedback hai chiều (20 Phút) 
-*Mục tiêu:* Hoàn thiện ma trận 2x2. [cite_start]Rà soát lại các màn hình đã vẽ để gắn thẻ chú thích [cite: 206-207].
-*Thao tác trên công cụ:* Kéo các thẻ Tag (màu sắc nổi bật) đặt cạnh các UI tương ứng:
-* [cite_start]**Tag: User Explicit Feedback:** Trỏ vào nút "Xóa đồ bơi" và việc chọn lý do "Đi công tác"[cite: 207].
-* [cite_start]**Tag: User Implicit Feedback:** Trỏ vào thời gian người dùng dừng lại đọc tooltip thời tiết, hoặc hành động bỏ qua không bấm vào link mua sạc dự phòng[cite: 207].
-* [cite_start]**Tag: System Explicit Feedback:** Trỏ vào Toast message "Đã ghi nhớ bối cảnh công tác"[cite: 207].
-* [cite_start]**Tag: System Implicit Feedback:** Trỏ vào UI checklist, nơi món đồ quan trọng (Áo khoác gió) được in đậm và đẩy lên đầu danh sách dựa theo thời tiết[cite: 207].
-
----
-
-## [cite_start]Giai đoạn 6: Nối Prototype, Rationale và Demo (15 Phút) 
-[cite_start]*Mục tiêu:* Chạy thử và chốt hạ tệp nộp bài [cite: 439-442].
-*Thao tác:*
-1.  [cite_start]**Nối tương tác (Prototyping):** Nối các nút bấm để tạo thành luồng có thể Click được từ màn 1 đến màn 7[cite: 81].
-2.  **Gắn thẻ Rationale (Bắt buộc):** Tạo các khung chú thích ngắn đặt ngay cạnh các cụm màn hình, trả lời các câu hỏi: AI đang biết gì? AI chưa biết gì? Vì sao AI được Act/Ask? [cite_start]Rủi ro nếu AI sai là gì? [cite: 176-187].
-    * [cite_start]*Ví dụ Rationale chỗ đề xuất mua sắm:* "Chi phí sai sót (mua nhầm) là mất tiền, rủi ro cao và khó hoàn tác. Vì vậy AI tuyệt đối không tự mua (Don't Act) mà phải hỏi ý kiến người dùng (Ask)" [cite: 190-192].
-3.  [cite_start]**Soạn Demo Path:** Lên kịch bản nói 5 phút theo cấu trúc: Giới thiệu lát cắt -> Trình bày Flow Onboarding -> Demo luồng chính có bằng chứng thời tiết -> Demo tính năng tự động khôi phục khi xóa đồ -> Tổng kết Rationale[cite: 436].
+1.  Mở tệp [index.html](file:///c:/Users/Administrator/Day18-Track1-2A202600980-NguyenNgocDuy/index.html) bằng bất kỳ trình duyệt web nào (Chrome, Edge, Safari...).
+2.  Trang chủ `Presentation Hub` sẽ đóng vai trò điều hướng. Tại đây bạn có thể:
+    *   Bấm vào các link tương tác để chuyển sang từng màn hình prototype độc lập.
+    *   Theo dõi kế hoạch thuyết trình 5 phút phân bổ ở cột bên phải.
+    *   Xem tóm tắt các lập luận thiết kế cốt lõi (Design Rationale) ở phần cuối trang.
+3.  Khi mở các trang prototype con (được thiết kế dạng mockup khung điện thoại di động thông minh), hãy click vào các nút bấm, toggle switches và checkbox để tương tác và cảm nhận phản hồi thời gian thực của hệ thống.
